@@ -1,0 +1,22 @@
+{
+  "val": {
+    "externalLoads": {},
+    "sectionLoads": {
+      "DEFAULT": [
+        { "xxx": 0 },
+        { "yyy": 100 }
+      ],
+      "s1": [
+        { "xxx": 0 },
+        { "yyy": 100 }
+      ]
+    },
+    "groupLoadsBySection": {
+      "s1": {
+        "api": { "zzz": 100 }
+      }
+    },
+    "readOnlyBySection": {},
+    "hostsByName": {}
+  }
+}

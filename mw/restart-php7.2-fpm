@@ -1,0 +1,4 @@
+#!/bin/bash
+#/usr/local/bin/safe-service-restart --lvs-urls http://lvs1015:9090/pools/apaches_80 http://lvs1016:9090/pools/apaches_80 http://lvs1015:9090/pools/appservers-https_443 http://lvs1016:9090/pools/appservers-https_443 --pools apache2 nginx --services php7.2-fpm --retries 10 --wait 5
+systemctl restart php7.2-fpm
+
