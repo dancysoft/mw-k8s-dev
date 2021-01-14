@@ -15,6 +15,7 @@ mkdir -p /run/mysqld
 chown mysql: /run/mysqld
 
 # This runs after mysqld starts (hopefully)
+# FIXME: Nothing reaps this.
 (sleep 2 ; setup_user ) &
 
 # FIXME: control-c doesn't terminate this
