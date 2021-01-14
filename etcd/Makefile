@@ -1,4 +1,4 @@
-IMAGE=registry.hq.dancysoft.com/local/etcd:latest
+IMAGE=registry.hq.dancysoft.com/local/etcd:4
 
 image:
 	docker build -t $(IMAGE) .
@@ -19,3 +19,9 @@ stop:
 
 logs:
 	docker logs -f etcd
+
+push: image
+	docker push $(IMAGE)
+
+cert:
+	./make-cert

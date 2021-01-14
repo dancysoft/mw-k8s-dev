@@ -3,12 +3,16 @@
 set -e
 
 function initialize_etcd_data {
+    echo Running initialize_etcd_data:
+    update-ca-certificates
     etcdctl set /conftool/v1/mediawiki-config/common/WMFMasterDatacenter '{"val": "dev"}'
     etcdctl set /conftool/v1/mediawiki-config/dev/ReadOnly '{"val": false}'
     etcdctl set /conftool/v1/mediawiki-config/dev/dbconfig < /tmp/dbconfig.json
+    echo initialize_etcd_data complete
 }
 
 # This will run after etcd starts (hopefully)
+# FIXME: nothing reaps this subprocess
 ( sleep 3 && initialize_etcd_data ) &
 
 exec etcd \
