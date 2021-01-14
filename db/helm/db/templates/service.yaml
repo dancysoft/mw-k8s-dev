@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "mwdb.fullname" . }}
+  name: {{ include "db.fullname" . }}
   labels:
-{{ include "mwdb.labels" . | indent 4 }}
+{{ include "db.labels" . | indent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: mysql
       protocol: TCP
-      name: http
+      name: mysql
   selector:
-    app.kubernetes.io/name: {{ include "mwdb.name" . }}
+    app.kubernetes.io/name: {{ include "db.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -6,11 +6,13 @@ set -e
 kubectl delete csr etcd.wmf || true
 
 # This generates server-key.pem and server.csr
+# FIXME: Use openssl which is more common
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
       "etcd.wmf.svc.cluster.local",
-      "etcd"
+      "etcd",
+      "mw-etcd"
   ],
   "CN": "system:node:etcd.wmf.svc.cluster.local",
   "key": {
@@ -44,6 +46,8 @@ sleep 1
 
 # approve it
 kubectl certificate approve etcd.wmf
+# Allow some time for the certificate to show up
+sleep 1
 
 # And extract the certificate
 kubectl get csr/etcd.wmf -o jsonpath='{.status.certificate}' | base64 --decode > server.crt

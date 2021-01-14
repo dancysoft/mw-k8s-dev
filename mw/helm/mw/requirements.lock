@@ -1,0 +1,9 @@
+dependencies:
+- name: etcd
+  repository: http://charts.hq.dancysoft.com:8080
+  version: 0.1.0
+- name: db
+  repository: http://charts.hq.dancysoft.com:8080
+  version: 0.1.0
+digest: sha256:7126d46a9305a3265c20a830fef7ef3103d8f6fe18b2a34c0a2a22eba1a18ec6
+generated: "2021-01-14T12:51:25.961735675-08:00"

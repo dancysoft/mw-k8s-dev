@@ -72,6 +72,8 @@ function representative_db_for_version {
     fgrep php-$version /srv/mediawiki/wikiversions-dev.json  | head -1 | sed -e 's/"//g' -e 's/://' | awk '{print $1}'
 }
 
+update-ca-certificates
+
 sudo -u mwdeploy scap wikiversions-compile
 
 for version in $(unique_wikiversions); do
@@ -80,11 +82,19 @@ done
 
 cd /srv/mediawiki
 
+# FIXME: Trim down to just enwiki (?).  Having all these dbs in here
+# makes startup time very long if the db server is empty.
+
+# FIXME: Separate this out.. the mw container should be able to start
+# up without it (but requests required a db will fail).
+
+# FIXME: Get information about --dbserver from private settings file.
+
 for wiki in aawiki enwiki labtestwiki testwiki testwikidatawiki; do
     # install.php won't do anything if it finds LocalSettings.php
     rm -f php/LocalSettings.php
     echo $wiki: Performing basic db setup
-    php php/maintenance/install.php $wiki admin --pass secret123123123123 --dbserver db --dbname $wiki --dbuser wikiuser --dbpass password
+    php php/maintenance/install.php $wiki admin --pass secret123123123123 --dbserver mw-db --dbname $wiki --dbuser wikiuser --dbpass password
 
     # Now that the basics are set up, use update.php with LocalSettings.php in place.  This
     # will create additional tables that are required by enabled extensions.
@@ -96,8 +106,10 @@ EOF
     mwscript maintenance/update.php --wiki=$wiki --quick
 done
 
+# FIXME: separate container
 /usr/share/memcached/scripts/systemd-memcached-wrapper /etc/memcached.conf &
 
+# FIXME: Use ServiceOps images
 php-fpm7.2 -D
 /usr/sbin/apache2ctl start
 exec tail -f /var/log/apache2/*.log

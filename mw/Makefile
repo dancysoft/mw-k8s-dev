@@ -1,8 +1,10 @@
-# FIXME: use a name different than train-dev
-IMAGE=registry.hq.dancysoft.com/local/train-dev:latest
+IMAGE=registry.hq.dancysoft.com/local/mw:5
 
 image:
 	docker build -t $(IMAGE) .
+
+push: image
+	docker push $(IMAGE)
 
 run: image
 	docker run \
