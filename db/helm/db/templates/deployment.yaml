@@ -33,15 +33,13 @@ spec:
             - name: mysql
               containerPort: 3306
               protocol: TCP
-          # FIXME: replace these with something useful
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          # Cribbed from https://github.com/bitnami/charts/blob/master/bitnami/mariadb/templates/primary/statefulset.yaml
+          livenessProbe:
+            exec:
+              command: [mysqladmin, status]
+          readinessProbe:
+            exec:
+              command: [mysqladmin, status]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
