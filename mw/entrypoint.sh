@@ -72,6 +72,7 @@ function representative_db_for_version {
     fgrep php-$version /srv/mediawiki/wikiversions-dev.json  | head -1 | sed -e 's/"//g' -e 's/://' | awk '{print $1}'
 }
 
+# So that we can communicate with etcd using TLS
 update-ca-certificates
 
 sudo -u mwdeploy scap wikiversions-compile
