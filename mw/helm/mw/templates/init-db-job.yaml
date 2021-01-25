@@ -1,7 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "mw.fullname" . }}-init-db
+  # Random characters added to the end of the job name because jobs cannot be
+  # updated.
+  name: {{ include "mw.fullname" . }}-init-db-x{{ randAlphaNum 8 | lower }}x
 spec:
   template:
     spec:

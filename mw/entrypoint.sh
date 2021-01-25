@@ -14,4 +14,6 @@ sudo -u mwdeploy scap wikiversions-compile
 # FIXME: Use ServiceOps images
 php-fpm7.2 -D
 /usr/sbin/apache2ctl start
-exec tail -f /var/log/apache2/*.log
+
+# Using bash to perform globbing
+exec tini bash -- -c "tail -f /var/log/apache2/*.log"

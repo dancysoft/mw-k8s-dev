@@ -35,6 +35,7 @@ spec:
             path: /tmp/l10n-cache
             type: DirectoryOrCreate
       initContainers:
+        # Ensure that hostPath /tmp/l10n-cache is writable by www-data
         - name: {{ .Chart.Name }}-init-l10n-dir
           securityContext:
             runAsUser: 0
@@ -51,6 +52,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ /init-l10n.sh ]
+          env:
+            - name: MW_LANGS
+              value: {{ .Values.langs | join "," | quote }}
           volumeMounts:
             - name: mediawiki
               mountPath: /srv/mediawiki

@@ -8,12 +8,15 @@ set -eu -o pipefail
 function _call_rebuildLocalisationCache {
     local wikidb=$1
     local cache_dir=$2
-    local lang=$3
+    local lang=${3:-}
     local force=${4:-}
 
-    if [ "$lang" ]; then
-         lang="--lang $lang"
+    if [ -z "$lang" -o "$lang" = "all" ]; then
+        lang=
+    elif [ "$lang" ]; then
+        lang="--lang $lang"
     fi
+
     if [ "$force" ]; then
         force="--force"
     fi
@@ -64,10 +67,10 @@ function update_localization_cache {
     sudo -u www-data /usr/local/bin/mwscript mergeMessageFileList.php --wiki=$wikidb --list-file=$ext_list --output=/tmp/new-ext-messages --quiet
     mv /tmp/new-ext-messages $extension_messages
 
-    # Rebuild all the CDB files for each language
-    echo Updating LocalisationCache for $version
+    # Build the CDB files
+    echo "Updating LocalisationCache for $version, languages: $MW_LANGS"
 
-    _call_rebuildLocalisationCache $wikidb $cache_dir "" $force_rebuild
+    _call_rebuildLocalisationCache $wikidb $cache_dir $MW_LANGS $force_rebuild
 }
 
 

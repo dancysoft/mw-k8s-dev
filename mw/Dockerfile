@@ -46,3 +46,5 @@ COPY entrypoint.sh init-db.sh init-l10n.sh init-l10n-locked.sh /
 EXPOSE 80
 VOLUME /srv/mediawiki
 ENTRYPOINT [ "/entrypoint.sh" ]
+
+RUN curl -L -o /usr/local/sbin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 && chmod +x /usr/local/sbin/tini
