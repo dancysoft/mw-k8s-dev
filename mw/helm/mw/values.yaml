@@ -36,7 +36,7 @@ db:
       - aawiki
       - enwiki
 
-replicaCount: 1
+replicaCount: 2
 
 #######
 

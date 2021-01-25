@@ -70,6 +70,9 @@ spec:
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
           resources:
+            requests:
+              cpu: 1
+              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
             limits:
               cpu: {{ .Values.l10n.cache.rebuildThreads }}
               memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
