@@ -17,7 +17,7 @@ db:
       - aawiki
       - enwiki
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: registry.hq.dancysoft.com/local/mw

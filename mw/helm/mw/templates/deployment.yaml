@@ -89,17 +89,17 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          # FIXME: reenable these when everything is working
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          #   # Allow plenty of time for l10n prep and db setup
-          #   initialDelaySeconds: 60
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /wiki/Main_Page
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: en.wikipedia.org
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
