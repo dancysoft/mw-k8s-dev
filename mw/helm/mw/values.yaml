@@ -2,10 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# langs: [] # all languages
-langs:
-  - en
-  - zh
+langs: [] # all languages
+# langs:
+#   - en
+#   - zh
 
 db:
   db:
