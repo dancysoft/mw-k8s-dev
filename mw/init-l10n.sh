@@ -21,12 +21,17 @@ function _call_rebuildLocalisationCache {
         force="--force"
     fi
 
-    # FIXME: This is a kubernetes anti-pattern.  We should heed the
-    # container cpu limit if there is one.  Also keep in mind that using
-    # more cpus means more memory use.
-    local ncpus=$(getconf _NPROCESSORS_ONLN)
+    local ncpus
+
+    if [ "${THREADS:-}" ]; then
+        ncpus=$THREADS
+    else
+        ncpus=$(getconf _NPROCESSORS_ONLN)
+    fi
+
+    echo "rebuildLocalisationCache.php with $ncpus thread(s)"
     
-    sudo -u www-data \
+    time sudo -u www-data \
          /usr/local/bin/mwscript rebuildLocalisationCache.php \
          --wiki=$wikidb \
          --store-class=LCStoreCDB \

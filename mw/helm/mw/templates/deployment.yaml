@@ -55,6 +55,8 @@ spec:
           env:
             - name: MW_LANGS
               value: {{ .Values.langs | join "," | quote }}
+            - name: THREADS
+              value: {{ .Values.l10nRebuildThreads | quote }}
           volumeMounts:
             - name: mediawiki
               mountPath: /srv/mediawiki

@@ -21,7 +21,7 @@ replicaCount: 2
 
 image:
   repository: registry.hq.dancysoft.com/local/mw
-  tag: 16
+  tag: 18
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
