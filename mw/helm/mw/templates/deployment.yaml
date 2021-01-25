@@ -63,9 +63,10 @@ spec:
               readOnly: true
             - name: l10n
               mountPath: /tmp/l10n-cache
-          # FIXME: need resource requests, particularly for memory which
-          # will large during a fresh l10n build.  The amount of memory will
-          # depend on the number of threads spawned.
+          resources:
+            limits:
+              cpu: {{ .Values.l10nRebuildThreads }}
+              memory: {{ .Values.l10nRebuildThreads | mul 150 }}Mi
 
       containers:
         - name: {{ .Chart.Name }}
