@@ -10,10 +10,9 @@ db:
   user:
   password:
   
-  # and, the dbs named in the following space-separated will be
-  # created and "owned" by the specified user.
-  # FIXME: Change to a list to be more yamlish
-  createDBs: ""
+  # and, the dbs named in the following list will be created and
+  # "owned" by the specified user.
+  createDBs: []
 
 ## 
 
@@ -21,7 +20,7 @@ replicaCount: 1
 
 image:
   repository: registry.hq.dancysoft.com/local/mwdb
-  tag: 2
+  tag: 3
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

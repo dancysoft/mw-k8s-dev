@@ -1,4 +1,4 @@
-IMAGE=registry.hq.dancysoft.com/local/mwdb:2
+IMAGE=registry.hq.dancysoft.com/local/mwdb:3
 
 image:
 	docker build -t $(IMAGE) .
