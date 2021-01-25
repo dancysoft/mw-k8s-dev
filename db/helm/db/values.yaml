@@ -2,11 +2,26 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+## DB config
+
+db:
+  # If both of these are set, the specified DB user will be created
+  # with the specified password.
+  user:
+  password:
+  
+  # and, the dbs named in the following space-separated will be
+  # created and "owned" by the specified user.
+  # FIXME: Change to a list to be more yamlish
+  createDBs: ""
+
+## 
+
 replicaCount: 1
 
 image:
   repository: registry.hq.dancysoft.com/local/mwdb
-  tag: 1
+  tag: 2
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

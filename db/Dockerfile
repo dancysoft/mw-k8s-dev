@@ -1,12 +1,13 @@
 FROM debian:10
 
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server python3-mysqldb
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server python3-mysqldb tini
 
 COPY 99-server-bind-wildcard.cnf /etc/mysql/mariadb.conf.d/99-server-bind-wildcard.cnf
 COPY 99-mediawiki.cnf /etc/mysql/mariadb.conf.d/99-mediawiki.cnf
 
-#RUN DEBIAN_FRONTEND=noninteractive apt-get install -y strace
+# Debug stuff
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y strace lsof procps
 
 COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]

@@ -29,6 +29,14 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DB_USER
+              value: {{ .Values.db.user | quote }}
+            # FIXME: Use secrets to pass credentials
+            - name: DB_PASSWORD
+              value: {{ .Values.db.password | quote }}
+            - name: CREATE_DBS
+              value: {{ .Values.db.createDBs | quote }}
           ports:
             - name: mysql
               containerPort: 3306

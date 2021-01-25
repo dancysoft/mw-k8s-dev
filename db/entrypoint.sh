@@ -3,10 +3,15 @@
 set -eu -o pipefail
 
 function setup_user {
-    mysql -e "create user 'wikiuser' identified by 'password';"
-    for db in aawiki enwiki labtestwiki testwiki testwikidatawiki  metawiki; do
-        mysql -e "grant all on $db.* to 'wikiuser' with grant option;"
-    done
+    if [ "${DB_USER:-}" -a "${DB_PASSWORD:-}" ]; then
+        echo Creating user $DB_USER
+        mysql -e "create user '$DB_USER' identified by '$DB_PASSWORD';"
+
+        for db in ${CREATE_DBS:-}; do
+            echo Creating db $db for user $DB_USER
+            mysql -e "grant all on $db.* to '$DB_USER' with grant option;"
+        done
+    fi
 }
 
 tail -f /var/log/mysql/error.log &
@@ -15,9 +20,6 @@ mkdir -p /run/mysqld
 chown mysql: /run/mysqld
 
 # This runs after mysqld starts (hopefully)
-# FIXME: Nothing reaps this.
 (sleep 2 ; setup_user ) &
 
-# FIXME: control-c doesn't terminate this
-exec mysqld
-
+exec tini mysqld
