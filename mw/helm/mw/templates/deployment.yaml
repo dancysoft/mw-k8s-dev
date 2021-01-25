@@ -30,6 +30,39 @@ spec:
         - name: ca
           configMap:
             name: kube-root-ca.crt
+        - name: l10n
+          hostPath:
+            path: /tmp/l10n-cache
+            type: DirectoryOrCreate
+      initContainers:
+        - name: {{ .Chart.Name }}-init-l10n-dir
+          securityContext:
+            runAsUser: 0
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "chown", "www-data:", "/tmp/l10n-cache" ]
+          volumeMounts:
+            - name: l10n
+              mountPath: /tmp/l10n-cache
+
+        - name: {{ .Chart.Name }}-init-l10n
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ /init-l10n.sh ]
+          volumeMounts:
+            - name: mediawiki
+              mountPath: /srv/mediawiki
+            - name: ca
+              mountPath: /usr/local/share/ca-certificates
+              readOnly: true
+            - name: l10n
+              mountPath: /tmp/l10n-cache
+          # FIXME: need resource requests, particularly for memory which
+          # will large during a fresh l10n build.  The amount of memory will
+          # depend on the number of threads spawned.
+
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -41,6 +74,9 @@ spec:
               mountPath: /srv/mediawiki
             - name: ca
               mountPath: /usr/local/share/ca-certificates
+              readOnly: true
+            - name: l10n
+              mountPath: /tmp/l10n-cache
               readOnly: true
           ports:
             - name: http

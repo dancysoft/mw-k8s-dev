@@ -2,11 +2,19 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+# MediaWiki DB config
+db:
+  db:
+    user: wikiuser
+    password: secret
+    createDBs: enwiki aawiki
+##
+
+replicaCount: 2
 
 image:
   repository: registry.hq.dancysoft.com/local/mw
-  tag: 5
+  tag: 11
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
