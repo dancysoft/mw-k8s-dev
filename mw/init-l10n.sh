@@ -74,8 +74,7 @@ function update_localization_cache {
 }
 
 function unique_wikiversions {
-    # FIXME: Use jq?
-    sed -e '/^{/d' -e '/^}/d' -e 's/,$//' -e 's/"//g' -e 's/php-//' $INIT_L10N_WIKIVERSIONS_JSON | awk '{print $2}' | sort -u
+    jq -r 'values[]' $INIT_L10N_WIKIVERSIONS_JSON | sort -u
 }
 
 function representative_db_for_version {
