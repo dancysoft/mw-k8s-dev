@@ -6,7 +6,6 @@ push:
 	helm push . wmf-local
 
 install:
-	helm dep update
 	helm install -n mw .
 
 uninstall:
@@ -14,3 +13,4 @@ uninstall:
 
 upgrade:
 	helm upgrade mw .
+

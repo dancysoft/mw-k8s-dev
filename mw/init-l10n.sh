@@ -2,8 +2,11 @@
 
 set -eu -o pipefail
 
-# FIXME:
-# * hardcoded /srv/mediawiki/wikiversions-dev.json
+# INPUTS
+INIT_L10N_CACHE_DIR=${INIT_L10N_CACHE_DIR:-/tmp/l10n-cache}
+INIT_L10N_WIKIVERSIONS_JSON=${INIT_L10N_WIKIVERSIONS_JSON:-/srv/mediawiki/wikiversions.json}
+INIT_L10N_THREADS=${INIT_L10N_THREADS:-$(getconf _NPROCESSORS_ONLN)}
+INIT_L10N_LANGS=${INIT_L10N_LANGS:-all} # comma-separated. blank also means all.
 
 function _call_rebuildLocalisationCache {
     local wikidb=$1
@@ -21,24 +24,17 @@ function _call_rebuildLocalisationCache {
         force="--force"
     fi
 
-    local ncpus
-
-    if [ "${THREADS:-}" ]; then
-        ncpus=$THREADS
-    else
-        ncpus=$(getconf _NPROCESSORS_ONLN)
-    fi
-
-    echo "rebuildLocalisationCache.php with $ncpus thread(s)"
+    echo "rebuildLocalisationCache.php with $INIT_L10N_THREADS thread(s)"
     
     time sudo -u www-data \
          /usr/local/bin/mwscript rebuildLocalisationCache.php \
          --wiki=$wikidb \
          --store-class=LCStoreCDB \
-         --threads=$ncpus \
+         --threads=$INIT_L10N_THREADS \
          --no-clear-message-blob-store \
          $lang \
          $force
+    echo "rebuildLocalisationCache.php finished"
 }
 
 # xref mediawiki/tools/scap/scap/tasks.py:update_localization_cache()
@@ -51,8 +47,7 @@ function update_localization_cache {
     local extension_messages=/srv/mediawiki/wmf-config/ExtensionMessages-$version.php
     touch $extension_messages
 
-    #local cache_dir=/srv/mediawiki/php-$version/cache/l10n
-    local cache_dir=/tmp/l10n-cache/$version
+    local cache_dir=$INIT_L10N_CACHE_DIR/$version
     local force_rebuild=
 
     echo cache_dir: $cache_dir
@@ -73,20 +68,20 @@ function update_localization_cache {
     mv /tmp/new-ext-messages $extension_messages
 
     # Build the CDB files
-    echo "Updating LocalisationCache for $version, languages: $MW_LANGS"
+    echo "Updating LocalisationCache for $version, languages: $INIT_L10N_LANGS"
 
-    _call_rebuildLocalisationCache $wikidb $cache_dir $MW_LANGS $force_rebuild
+    _call_rebuildLocalisationCache $wikidb $cache_dir $INIT_L10N_LANGS $force_rebuild
 }
 
-
 function unique_wikiversions {
-    sed -e '/^{/d' -e '/^}/d' -e 's/,$//' -e 's/"//g' -e 's/php-//' /srv/mediawiki/wikiversions-dev.json | awk '{print $2}' | sort -u
+    # FIXME: Use jq?
+    sed -e '/^{/d' -e '/^}/d' -e 's/,$//' -e 's/"//g' -e 's/php-//' $INIT_L10N_WIKIVERSIONS_JSON | awk '{print $2}' | sort -u
 }
 
 function representative_db_for_version {
     local version=$1
     
-    fgrep php-$version /srv/mediawiki/wikiversions-dev.json  | head -1 | sed -e 's/"//g' -e 's/://' | awk '{print $1}'
+    fgrep php-$version $INIT_L10N_WIKIVERSIONS_JSON  | head -1 | sed -e 's/"//g' -e 's/://' | awk '{print $1}'
 }
 
 update-ca-certificates
@@ -94,3 +89,5 @@ update-ca-certificates
 for version in $(unique_wikiversions); do
     update_localization_cache $version $(representative_db_for_version $version)
 done
+
+echo $0 finished.

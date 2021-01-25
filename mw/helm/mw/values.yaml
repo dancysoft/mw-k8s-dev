@@ -2,16 +2,35 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-langs: [] # all languages
-# langs:
-#   - en
-#   - zh
+wikiversionsJson: /srv/mediawiki/wikiversions-dev.json
 
-l10nRebuildThreads: 2
+l10n:
+  cache:
+    langs: [] # all languages
+    # use a short list to speed mw pod startup time
+    # langs:
+    #   - en
+    #   - zh
 
+    # More means faster pod startup (if you have the CPU capacity)
+    rebuildThreads: 2
+
+    # This directory will automatically be created on every node where
+    # the mediawiki pods run.  It will be populated by pods when they
+    # start.  Pods running on the same node will share the cache.
+    # Storage requirements: 2GB per mediawiki version.
+    nodePath: /tmp/l10n-cache
+
+    # For this to work, wmf-config/CommonSettings.php
+    # must have:
+    # $wgLocalisationCacheConf['storeDirectory'] = "/tmp/l10n-cache/$wmgVersionNumber";
+    containerPath: /tmp/l10n-cache
+
+# FIXME: unintuitive db.db.
 db:
   db:
     user: wikiuser
+    # FIXME: should be a secret
     password: secret
     createDBs:
       - aawiki
@@ -19,9 +38,11 @@ db:
 
 replicaCount: 1
 
+#######
+
 image:
   repository: registry.hq.dancysoft.com/local/mw
-  tag: 18
+  tag: 20
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

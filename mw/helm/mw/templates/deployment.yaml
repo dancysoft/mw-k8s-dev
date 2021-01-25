@@ -32,31 +32,35 @@ spec:
             name: kube-root-ca.crt
         - name: l10n
           hostPath:
-            path: /tmp/l10n-cache
+            path: {{ .Values.l10n.cache.nodePath }}
             type: DirectoryOrCreate
       initContainers:
-        # Ensure that hostPath /tmp/l10n-cache is writable by www-data
+        # Ensure that l10n.cache.containerPath is writable by www-data
         - name: {{ .Chart.Name }}-init-l10n-dir
           securityContext:
             runAsUser: 0
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "chown", "www-data:", "/tmp/l10n-cache" ]
+          command: [ "chown", "www-data:", {{ .Values.l10n.cache.containerPath }} ]
           volumeMounts:
             - name: l10n
-              mountPath: /tmp/l10n-cache
+              mountPath: {{ .Values.l10n.cache.containerPath }}
 
         - name: {{ .Chart.Name }}-init-l10n
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ /init-l10n.sh ]
+          command: [ /init-l10n-locked.sh ]
           env:
-            - name: MW_LANGS
-              value: {{ .Values.langs | join "," | quote }}
-            - name: THREADS
-              value: {{ .Values.l10nRebuildThreads | quote }}
+            - name: INIT_L10N_CACHE_DIR
+              value: {{ .Values.l10n.cache.containerPath }}
+            - name: INIT_L10N_WIKIVERSIONS_JSON
+              value: {{ .Values.wikiversionsJson | required "wikiversionsJson value must be set" }}
+            - name: INIT_L10N_LANGS
+              value: {{ .Values.l10n.cache.langs | join "," | quote }}
+            - name: INIT_L10N_THREADS
+              value: {{ .Values.l10n.cache.rebuildThreads | quote }}
           volumeMounts:
             - name: mediawiki
               mountPath: /srv/mediawiki
@@ -64,11 +68,11 @@ spec:
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
             - name: l10n
-              mountPath: /tmp/l10n-cache
+              mountPath: {{ .Values.l10n.cache.containerPath }}
           resources:
             limits:
-              cpu: {{ .Values.l10nRebuildThreads }}
-              memory: {{ .Values.l10nRebuildThreads | mul 150 }}Mi
+              cpu: {{ .Values.l10n.cache.rebuildThreads }}
+              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
 
       containers:
         - name: {{ .Chart.Name }}
@@ -83,7 +87,7 @@ spec:
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
             - name: l10n
-              mountPath: /tmp/l10n-cache
+              mountPath: {{ .Values.l10n.cache.containerPath }}
               readOnly: true
           ports:
             - name: http
