@@ -36,7 +36,7 @@ spec:
             - name: DB_PASSWORD
               value: {{ .Values.db.password | quote }}
             - name: CREATE_DBS
-              value: {{ .Values.db.createDBs | join "," | quote }}
+              value: {{ .Values.db.createDBs | join " " | quote }}
           ports:
             - name: mysql
               containerPort: 3306
