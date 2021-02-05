@@ -6,7 +6,7 @@ set -eu -o pipefail
 
 IMAGE=registry.hq.dancysoft.com/local/mediawiki:1
 WIKIVERSIONS=wikiversions-dev.json
-BUILD_DIR=/tmp/staging/mediawiki
+BUILD_DIR=${BUILD_DIR:-/tmp/staging/mediawiki}
 
 if ! command -v jq >/dev/null; then
     echo "Please install 'jq'"
@@ -23,7 +23,8 @@ function prep_version {
     local nophpvers=${vers:4}   # will be something like 1.36.0-wmf.27
     local branch=wmf/$nophpvers # branch will be something like wmf/1.36.0-wmf.27
 
-    time git clone --depth 1 -b $branch ssh://gerrit.wikimedia.org:29418/mediawiki/core $vers
+    # https://gerrit.wikimedia.org/r
+    time git clone --depth 1 -b $branch https://gerrit.wikimedia.org/r/mediawiki/core $vers
     git -C $vers config submodule.fetchJobs $(getconf _NPROCESSORS_ONLN)
     time git -C $vers submodule update --init --recursive
 
@@ -48,7 +49,7 @@ EOF
 }
 
 function checkout_mediawiki_config {
-    time git clone --depth 1 -b dancy-k8s-dev ssh://gerrit.wikimedia.org:29418/operations/mediawiki-config $BUILD_DIR
+    time git clone --depth 1 -b dancy-k8s-dev https://gerrit.wikimedia.org/r/operations/mediawiki-config $BUILD_DIR
 }
 
 # Writes to stdout
