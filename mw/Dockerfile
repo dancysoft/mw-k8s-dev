@@ -1,6 +1,6 @@
 FROM debian:9
 
-COPY --from=mediawiki:latest /srv/mediawiki /srv/mediawiki
+COPY --from=registry.hq.dancysoft.com/local/mediawiki:1 /srv/mediawiki /srv/mediawiki
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y dirmngr curl sudo

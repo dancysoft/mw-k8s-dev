@@ -1,0 +1,91 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+# This operation takes about 5 minutes for 2 MW versions.
+
+IMAGE=registry.hq.dancysoft.com/local/mediawiki:1
+WIKIVERSIONS=wikiversions-dev.json
+BUILD_DIR=/tmp/staging/mediawiki
+
+if ! command -v jq >/dev/null; then
+    echo "Please install 'jq'"
+    exit 1
+fi
+
+function unique_wikiversions {
+    jq -r 'values[]' $WIKIVERSIONS | sort -u
+}
+
+function prep_version {
+    local vers=$1               # vers will be something like php-1.36.0-wmf.27
+
+    local nophpvers=${vers:4}   # will be something like 1.36.0-wmf.27
+    local branch=wmf/$nophpvers # branch will be something like wmf/1.36.0-wmf.27
+
+    time git clone --depth 1 -b $branch ssh://gerrit.wikimedia.org:29418/mediawiki/core $vers
+    git -C $vers config submodule.fetchJobs $(getconf _NPROCESSORS_ONLN)
+    time git -C $vers submodule update --init --recursive
+
+    cat <<EOF > $vers/LocalSettings.php
+<?php
+require __DIR__ . "/../wmf-config/CommonSettings.php";
+EOF
+}    
+
+
+function build_and_push_image {
+    cat <<EOF > $BUILD_DIR/.dockerignore
+**/.git
+EOF
+    
+    cat <<EOF > $BUILD_DIR/Dockerfile
+FROM scratch as mediawiki
+COPY / /srv/mediawiki
+EOF
+    time docker build -t $IMAGE $BUILD_DIR
+    time docker push $IMAGE
+}
+
+function checkout_mediawiki_config {
+    time git clone --depth 1 -b dancy-k8s-dev ssh://gerrit.wikimedia.org:29418/operations/mediawiki-config $BUILD_DIR
+}
+
+# Writes to stdout
+function generate_wikiversions_php {
+    cat <<EOF
+<?php
+return array(
+EOF
+    jq -r 'to_entries[] | "    \"\(.key)\" => \"\(.value)\","' < $WIKIVERSIONS
+    cat <<EOF
+);
+EOF
+}
+
+function compile_wikiversions {
+    php=$(basename $WIKIVERSIONS .json).php
+    
+    generate_wikiversions_php > $php
+}
+
+# Start fresh
+rm -fr $BUILD_DIR
+
+checkout_mediawiki_config
+
+cd $BUILD_DIR
+
+compile_wikiversions
+
+for vers in $(unique_wikiversions); do
+    prep_version $vers
+done
+
+echo Image storage requirements excluding .git dirs
+du $BUILD_DIR -s -h --exclude .git
+
+build_and_push_image
+
+# Cleanup
+rm -fr $BUILD_DIR
