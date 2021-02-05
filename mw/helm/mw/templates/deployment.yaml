@@ -24,9 +24,6 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-        - name: mediawiki
-          hostPath:
-            path: /srv/mediawiki
         - name: ca
           configMap:
             name: kube-root-ca.crt
@@ -34,6 +31,11 @@ spec:
           hostPath:
             path: {{ .Values.l10n.cache.nodePath }}
             type: DirectoryOrCreate
+        - name: private
+          secret:
+            # FIXME: parameterize name
+            secretName: mw-private
+
       initContainers:
         # Ensure that l10n.cache.containerPath is writable by www-data
         - name: {{ .Chart.Name }}-init-l10n-dir
@@ -53,22 +55,19 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ /init-l10n-locked.sh ]
           env:
-            - name: INIT_L10N_CACHE_DIR
-              value: {{ .Values.l10n.cache.containerPath }}
-            - name: INIT_L10N_WIKIVERSIONS_JSON
-              value: {{ .Values.wikiversionsJson | required "wikiversionsJson value must be set" }}
             - name: INIT_L10N_LANGS
               value: {{ .Values.l10n.cache.langs | join "," | quote }}
             - name: INIT_L10N_THREADS
               value: {{ .Values.l10n.cache.rebuildThreads | quote }}
           volumeMounts:
-            - name: mediawiki
-              mountPath: /srv/mediawiki
             - name: ca
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
+            - name: private
+              mountPath: /srv/mediawiki/private
+              readOnly: true
           resources:
             requests:
               cpu: 1
@@ -84,13 +83,14 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
-            - name: mediawiki
-              mountPath: /srv/mediawiki
             - name: ca
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
+              readOnly: true
+            - name: private
+              mountPath: /srv/mediawiki/private
               readOnly: true
           ports:
             - name: http

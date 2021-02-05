@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+
+image=$(grep ^IMAGE= Makefile)
+    
+if [[ $image =~ ^IMAGE=([^:]+):([0-9]+) ]]; then
+    repo=${BASH_REMATCH[1]}
+    oldtag=${BASH_REMATCH[2]}
+
+    newtag=$((oldtag+1))
+
+    echo New: $repo:$newtag
+
+    echo Updating Makefile
+    sed -i -e "/^IMAGE=/s|.*|IMAGE=$repo:$newtag|" Makefile
+
+    echo Updating helm/mw/values.yaml
+    yq .image.tag=$newtag helm/mw/values.yaml | sponge helm/mw/values.yaml
+else
+    echo Did not find expect IMAGE= line in Makefile
+    exit 1
+fi
+
+

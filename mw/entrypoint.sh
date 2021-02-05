@@ -2,11 +2,20 @@
 
 set -eu -o pipefail
 
+if [ $# -gt 0 ]; then
+    case "$1" in
+        bash)
+            exec "$@"
+            ;;
+        *)
+            echo Unhandled command \'$*\'.  Ignoring
+            ;;
+    esac
+fi
+
 # Ensure that any injected CA certs are known so that we can
 # communicate with etcd using TLS.
 update-ca-certificates
-
-sudo -u mwdeploy scap wikiversions-compile
 
 # FIXME: separate container
 /usr/share/memcached/scripts/systemd-memcached-wrapper /etc/memcached.conf &

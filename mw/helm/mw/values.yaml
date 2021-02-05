@@ -1,104 +1,54 @@
-# Default values for mw.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-wikiversionsJson: /srv/mediawiki/wikiversions-dev.json
-
-l10n:
-  cache:
-    langs: [] # all languages
-    # use a short list to speed mw pod startup time
-    # langs:
-    #   - en
-    #   - zh
-
-    # More means faster pod startup (if you have the CPU capacity)
-    rebuildThreads: 2
-
-    # This directory will automatically be created on every node where
-    # the mediawiki pods run.  It will be populated by pods when they
-    # start.  Pods running on the same node will share the cache.
-    # Storage requirements: 2GB per mediawiki version.
-    nodePath: /tmp/l10n-cache
-
-    # For this to work, wmf-config/CommonSettings.php
-    # must have:
-    # $wgLocalisationCacheConf['storeDirectory'] = "/tmp/l10n-cache/$wmgVersionNumber";
-    containerPath: /tmp/l10n-cache
-
-# FIXME: unintuitive db.db.
-db:
-  db:
-    user: wikiuser
-    # FIXME: should be a secret
-    password: secret
-    createDBs:
-      - aawiki
-      - enwiki
-
-replicaCount: 2
-
-#######
-
-image:
-  repository: registry.hq.dancysoft.com/local/mw
-  tag: 20
-  pullPolicy: IfNotPresent
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name:
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths: []
-
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+{
+  "l10n": {
+    "cache": {
+      "langs": [],
+      "rebuildThreads": 2,
+      "nodePath": "/tmp/l10n-cache",
+      "containerPath": "/tmp/l10n-cache"
+    }
+  },
+  "db": {
+    "db": {
+      "user": "wikiuser",
+      "password": "secret",
+      "createDBs": [
+        "aawiki",
+        "enwiki"
+      ]
+    }
+  },
+  "replicaCount": 2,
+  "image": {
+    "repository": "registry.hq.dancysoft.com/local/mw",
+    "tag": 39,
+    "pullPolicy": "IfNotPresent"
+  },
+  "imagePullSecrets": [],
+  "nameOverride": "",
+  "fullnameOverride": "",
+  "serviceAccount": {
+    "create": false,
+    "name": null
+  },
+  "podSecurityContext": {},
+  "securityContext": {},
+  "service": {
+    "type": "ClusterIP",
+    "port": 80
+  },
+  "ingress": {
+    "enabled": false,
+    "annotations": {},
+    "hosts": [
+      {
+        "host": "chart-example.local",
+        "paths": []
+      }
+    ],
+    "tls": []
+  },
+  "resources": {},
+  "nodeSelector": {},
+  "tolerations": [],
+  "affinity": {}
+}

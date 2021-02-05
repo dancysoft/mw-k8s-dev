@@ -8,7 +8,7 @@ function wait_for_db {
     echo "$(date): Waiting for DB server $DB_SERVER to become available to $DB_USER"
 
     for ((attempt=0; attempt<$max_attempts; attempt++)); do
-        if mysql -h "$DB_SERVER" -u "$DB_USER" -p"$DB_PASS" </dev/null; then
+        if mysql -h "$DB_SERVER" -u "$DB_USER" -p"$DB_PASS" --connect-timeout=10 </dev/null; then
             echo "$(date): DB is available"
             return
         else

@@ -1,5 +1,7 @@
 FROM debian:9
 
+COPY --from=mediawiki:latest /srv/mediawiki /srv/mediawiki
+
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y dirmngr curl sudo
 RUN curl -s -f 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8a2df05748f9d524a3a2ade9d392d3ffadf18fb' | apt-key add -
@@ -7,7 +9,7 @@ RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia
 RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia component/php72' >> /etc/apt/sources.list
 RUN apt-get update
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm=7.2.31-1+0~20200514.41+debian9~1.gbpe2a56b+wmf1 php-apcu php-curl php7.2-dba php-intl php-memcached=3.0.1+2.2.0-1~wmf3 php-msgpack=2.0.2+0.5.7-1~wmf3+php72 php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached nginx-full=1.13.9-1+wmf2 rsync scap firejail mysql-client
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm=7.2.31-1+0~20200514.41+debian9~1.gbpe2a56b+wmf1 php-apcu php-curl php7.2-dba php-intl php-memcached=3.0.1+2.2.0-1~wmf3 php-msgpack=2.0.2+0.5.7-1~wmf3+php72 php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached nginx-full=1.13.9-1+wmf2 rsync firejail mysql-client
 
 # Debug stuff
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y strace lsof net-tools tcpdump emacs-nox
@@ -31,20 +33,20 @@ COPY php7adm /usr/local/bin/php7adm
 
 COPY php-monitoring/ /var/www/php-monitoring/
 
+# FIXME: This should be configured at runtime
 RUN echo dev > /etc/wikimedia-cluster
-RUN useradd mwdeploy -d /var/lib/mwdeploy 
 
-COPY scap.cfg /etc
+RUN useradd mwdeploy -d /var/lib/mwdeploy 
 
 COPY mediawiki.sh /etc/profile.d/
 COPY mwscript /usr/local/bin/
-
 COPY memcached.conf /etc/memcached.conf
 
-COPY entrypoint.sh init-db.sh init-l10n.sh init-l10n-locked.sh /
+COPY subs.sh entrypoint.sh init-db.sh init-l10n.sh init-l10n-locked.sh merge-message-file-lists.sh rebuild-cdb.sh /
+
+RUN /merge-message-file-lists.sh && rm -fr /tmp/mw-cache-* /tmp/l10n-cache /tmp/wiki.log
 
 EXPOSE 80
-VOLUME /srv/mediawiki
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 RUN curl -L -o /usr/local/sbin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 && chmod +x /usr/local/sbin/tini

@@ -9,12 +9,13 @@ spec:
     spec:
       restartPolicy: Never
       volumes:
-        - name: mediawiki
-          hostPath:
-            path: /srv/mediawiki
         - name: ca
           configMap:
             name: kube-root-ca.crt
+        - name: private
+          secret:
+            # FIXME: parameterize name
+            secretName: mw-private
       containers:
         - name: {{ .Chart.Name }}-init-db
           securityContext:
@@ -31,10 +32,11 @@ spec:
             - name: DB_PASS
               value: {{ .Values.db.db.password | quote }}
           volumeMounts:
-            - name: mediawiki
-              mountPath: /srv/mediawiki
             - name: ca
               mountPath: /usr/local/share/ca-certificates
+              readOnly: true
+            - name: private
+              mountPath: /srv/mediawiki/private
               readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

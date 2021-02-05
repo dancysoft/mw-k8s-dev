@@ -1,4 +1,4 @@
-IMAGE=registry.hq.dancysoft.com/local/mw:20
+IMAGE=registry.hq.dancysoft.com/local/mw:39
 
 image:
 	docker build -t $(IMAGE) .
@@ -9,10 +9,8 @@ push: image
 run: image
 	docker run \
 		-d \
-		--init \
 		--rm \
 		--name mw \
-		-v ~/src/wmf/hacking/staging:/srv/mediawiki \
 		-p 8081:80 \
 		--link etcd:etcd.hq.dancysoft.com \
 		--link mwdb:db \
@@ -23,3 +21,9 @@ stop:
 
 logs:
 	docker logs -f mw
+
+helm-install:
+	$(MAKE) -C helm/mw install
+
+helm-uninstall:
+	$(MAKE) -C helm/mw uninstall
