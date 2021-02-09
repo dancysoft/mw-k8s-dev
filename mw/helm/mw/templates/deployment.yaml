@@ -33,8 +33,7 @@ spec:
             type: DirectoryOrCreate
         - name: private
           secret:
-            # FIXME: parameterize name
-            secretName: mw-private
+            secretName: {{ include "mw.fullname" . }}-private
 
       initContainers:
         # Ensure that l10n.cache.containerPath is writable by www-data

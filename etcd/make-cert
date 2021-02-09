@@ -1,31 +1,31 @@
 #!/bin/bash
 
-set -e
+# This script generates:
+#
+# Files:
+# * ssl/key.pem
+# * ssl/server.crt
+#
+# Kubernetes secrets:
+# * etcd-tls
+#
+
+set -eu -o pipefail
+
+mkdir -p ssl
+cd ssl
 
 # Delete any existing CSR
-kubectl delete csr etcd.wmf || true
+kubectl delete csr etcd.wmf 2>/dev/null || true
 
-# This generates server-key.pem and server.csr
-# FIXME: Use openssl which is more common
-cat <<EOF | cfssl genkey - | cfssljson -bare server
-{
-  "hosts": [
-      "etcd.wmf.svc.cluster.local",
-      "etcd",
-      "mw-etcd"
-  ],
-  "CN": "system:node:etcd.wmf.svc.cluster.local",
-  "key": {
-    "algo": "ecdsa",
-    "size": 256
-  },
-  "names": [
-    {
-      "O": "system:nodes"
-    }
-  ]
-}
-EOF
+# --addext requires openssl 1.1.1
+openssl req -new \
+        -subj /CN=system:node:etcd.wmf.svc.cluster.local/O=system:nodes \
+        -addext "subjectAltName=DNS:mw-etcd, DNS:etcd" \
+        -newkey rsa:4096 \
+        -nodes \
+        -keyout key.pem \
+        -out csr.pem
 
 cat <<EOF | kubectl apply -f -
 apiVersion: certificates.k8s.io/v1
@@ -33,7 +33,7 @@ kind: CertificateSigningRequest
 metadata:
   name: etcd.wmf
 spec:
-  request: $(cat server.csr | base64 | tr -d '\n')
+  request: $(cat csr.pem | base64 -w0)
   signerName: kubernetes.io/kubelet-serving
   usages:
   - digital signature
@@ -41,18 +41,20 @@ spec:
   - server auth
 EOF
 
-# Give it time to show up
-sleep 1
+rm csr.pem
 
-# approve it
+# Give it time to show up
+sleep 3
+
+# Approve the CSR
 kubectl certificate approve etcd.wmf
 # Allow some time for the certificate to show up
-sleep 1
+sleep 3
 
 # And extract the certificate
 kubectl get csr/etcd.wmf -o jsonpath='{.status.certificate}' | base64 --decode > server.crt
 
 kubectl delete secret etcd-tls || true
-kubectl create secret tls etcd-tls --key=server-key.pem --cert=server.crt
+kubectl create secret tls etcd-tls --key=key.pem --cert=server.crt
 
 echo etcd-tls secret has been created

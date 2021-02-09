@@ -14,8 +14,7 @@ spec:
             name: kube-root-ca.crt
         - name: private
           secret:
-            # FIXME: parameterize name
-            secretName: mw-private
+            secretName: {{ include "mw.fullname" . }}-private
       containers:
         - name: {{ .Chart.Name }}-init-db
           securityContext:

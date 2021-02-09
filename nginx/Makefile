@@ -1,4 +1,4 @@
-IMAGE=registry.hq.dancysoft.com/local/mwnginx:latest
+IMAGE:=$(IMAGE_PREFIX)/mwnginx:1
 
 image:
 	docker build -t $(IMAGE) .

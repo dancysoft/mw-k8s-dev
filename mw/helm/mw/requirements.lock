@@ -1,9 +1,9 @@
 dependencies:
 - name: etcd
-  repository: http://charts.hq.dancysoft.com:8080
+  repository: file://../../../etcd/helm/etcd
   version: 0.1.0
 - name: db
-  repository: http://charts.hq.dancysoft.com:8080
-  version: 0.1.5
-digest: sha256:7126d46a9305a3265c20a830fef7ef3103d8f6fe18b2a34c0a2a22eba1a18ec6
-generated: "2021-01-15T12:55:52.311394075-08:00"
+  repository: file://../../../db/helm/db
+  version: 0.1.8
+digest: sha256:5dc9d1f4e77527cb7ed71e29b5f06079ce778136ed31d9ae3fd618b42a11c566
+generated: "2021-02-10T14:34:20.439723055-08:00"

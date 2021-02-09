@@ -40,3 +40,4 @@ sudo -u www-data \
      --threads=$threads \
      --no-clear-message-blob-store \
      $lang
+echo $0: rebuildLocalisationCache.php exited with status $?

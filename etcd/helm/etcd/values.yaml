@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: registry.hq.dancysoft.com/local/etcd
+  repository: localhost:5000/dancy/mw-k8s-dev/etcd
   tag: 4
   pullPolicy: IfNotPresent
 

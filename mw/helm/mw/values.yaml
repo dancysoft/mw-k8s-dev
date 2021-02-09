@@ -3,7 +3,8 @@
     "cache": {
       "langs": [],
       "rebuildThreads": 2,
-      "nodePath": "/tmp/l10n-cache",
+      # Note that /tmp is a tmpfs on minikube but /var/tmp is on a real filesystem.
+      "nodePath": "/var/tmp/l10n-cache",
       "containerPath": "/tmp/l10n-cache"
     }
   },
@@ -19,8 +20,8 @@
   },
   "replicaCount": 2,
   "image": {
-    "repository": "registry.hq.dancysoft.com/local/mw",
-    "tag": 39,
+    "repository": "localhost:5000/dancy/mw-k8s-dev/mw",
+    "tag": 44,
     "pullPolicy": "IfNotPresent"
   },
   "imagePullSecrets": [],

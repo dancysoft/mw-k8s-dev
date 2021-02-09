@@ -1,0 +1,2 @@
+export IMAGE_PREFIX:=localhost:5000/dancy/mw-k8s-dev
+export MMW_IMAGE:=$(IMAGE_PREFIX)/mvmw:1

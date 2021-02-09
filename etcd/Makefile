@@ -1,4 +1,4 @@
-IMAGE=registry.hq.dancysoft.com/local/etcd:4
+IMAGE:=$(IMAGE_PREFIX)/etcd:4
 
 image:
 	docker build -t $(IMAGE) .
@@ -23,5 +23,11 @@ logs:
 push: image
 	docker push $(IMAGE)
 
-cert:
+cert: ssl/server.crt
+
+# make-cert requires access to a k8s cluster
+ssl/server.crt: make-cert
 	./make-cert
+
+clean-cert:
+	rm -f ssl/*

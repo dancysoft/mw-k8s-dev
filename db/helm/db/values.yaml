@@ -19,7 +19,7 @@ db:
 replicaCount: 1
 
 image:
-  repository: registry.hq.dancysoft.com/local/mwdb
+  repository: localhost:5000/dancy/mw-k8s-dev/mwdb
   tag: 3
   pullPolicy: IfNotPresent
 

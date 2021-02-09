@@ -4,14 +4,15 @@ set -eu -o pipefail
 
 # This operation takes about 5 minutes for 2 MW versions.
 
-IMAGE=registry.hq.dancysoft.com/local/mediawiki:1
 WIKIVERSIONS=wikiversions-dev.json
-BUILD_DIR=${BUILD_DIR:-/tmp/staging/mediawiki}
+BUILD_DIR=/srv/mediawiki
 
-if ! command -v jq >/dev/null; then
-    echo "Please install 'jq'"
-    exit 1
-fi
+for tool in jq git sort; do
+    if ! command -v $tool >/dev/null; then
+        echo "Please install '$tool'"
+        exit 1
+    fi
+done
 
 function unique_wikiversions {
     jq -r 'values[]' $WIKIVERSIONS | sort -u
@@ -34,19 +35,6 @@ require __DIR__ . "/../wmf-config/CommonSettings.php";
 EOF
 }    
 
-
-function build_and_push_image {
-    cat <<EOF > $BUILD_DIR/.dockerignore
-**/.git
-EOF
-    
-    cat <<EOF > $BUILD_DIR/Dockerfile
-FROM scratch as mediawiki
-COPY / /srv/mediawiki
-EOF
-    time docker build -t $IMAGE $BUILD_DIR
-    time docker push $IMAGE
-}
 
 function checkout_mediawiki_config {
     time git clone --depth 1 -b dancy-k8s-dev https://gerrit.wikimedia.org/r/operations/mediawiki-config $BUILD_DIR
@@ -83,10 +71,7 @@ for vers in $(unique_wikiversions); do
     prep_version $vers
 done
 
-echo Image storage requirements excluding .git dirs
-du $BUILD_DIR -s -h --exclude .git
+find $BUILD_DIR -name .git | xargs rm -fr
 
-build_and_push_image
-
-# Cleanup
-rm -fr $BUILD_DIR
+echo Image storage requirements
+du $BUILD_DIR -s -h

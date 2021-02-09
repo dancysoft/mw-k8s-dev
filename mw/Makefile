@@ -1,7 +1,10 @@
-IMAGE=registry.hq.dancysoft.com/local/mw:39
+include ../Makefile.defs
+
+IMAGE:=$(IMAGE_PREFIX)/mw:44
 
 image:
-	docker build -t $(IMAGE) .
+	sed -e s\|MMW_IMAGE\|$(MMW_IMAGE)\| Dockerfile.template > Dockerfile.generated
+	docker build -f Dockerfile.generated -t $(IMAGE) .
 
 push: image
 	docker push $(IMAGE)
@@ -27,3 +30,6 @@ helm-install:
 
 helm-uninstall:
 	$(MAKE) -C helm/mw uninstall
+
+helm-upgrade:
+	$(MAKE) -C helm/mw upgrade
