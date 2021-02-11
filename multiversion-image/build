@@ -18,15 +18,28 @@ function unique_wikiversions {
     jq -r 'values[]' $WIKIVERSIONS | sort -u
 }
 
+function choose_num_fetch_jobs {
+    local n=$(getconf _NPROCESSORS_ONLN)
+
+    if [ $n -gt 4 ]; then
+        # More is not necessarily better
+        n=4
+    fi
+
+    echo $n
+}
+
 function prep_version {
     local vers=$1               # vers will be something like php-1.36.0-wmf.27
 
     local nophpvers=${vers:4}   # will be something like 1.36.0-wmf.27
     local branch=wmf/$nophpvers # branch will be something like wmf/1.36.0-wmf.27
 
-    # https://gerrit.wikimedia.org/r
+    local fetch_jobs=$(choose_num_fetch_jobs)
+
     time git clone --depth 1 -b $branch https://gerrit.wikimedia.org/r/mediawiki/core $vers
-    git -C $vers config submodule.fetchJobs $(getconf _NPROCESSORS_ONLN)
+    echo Using $fetch_jobs jobs for submodule update
+    git -C $vers config submodule.fetchJobs $fetch_jobs
     time git -C $vers submodule update --init --recursive
 
     cat <<EOF > $vers/LocalSettings.php
