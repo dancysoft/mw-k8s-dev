@@ -9,7 +9,7 @@ RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia
 RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia component/php72' >> /etc/apt/sources.list
 RUN apt-get update
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm=7.2.31-1+0~20200514.41+debian9~1.gbpe2a56b+wmf1 php-apcu php-curl php7.2-dba php-intl php-memcached=3.0.1+2.2.0-1~wmf3 php-msgpack=2.0.2+0.5.7-1~wmf3+php72 php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached nginx-full=1.13.9-1+wmf2 rsync firejail mysql-client
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm=7.2.31-1+0~20200514.41+debian9~1.gbpe2a56b+wmf1 php-apcu php-curl php7.2-dba php-intl php-memcached=3.0.1+2.2.0-1~wmf3 php-msgpack=2.0.2+0.5.7-1~wmf3+php72 php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached rsync firejail mysql-client
 
 # Debug stuff
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y strace lsof net-tools tcpdump emacs-nox

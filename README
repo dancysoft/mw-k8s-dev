@@ -1,18 +1,19 @@
-Requirements:
+# Install required packages
 
-GNU make
-curl
-minikube
+apt install make curl git jq
 
-Setup notes:
+# Install minikube if needed. Requires sudo
+make install-minikube
 
-Install minikube 1.17.1
+# Install kubectl if needed. Requires sudo
+make install-kubectl
 
-Start minikube:
-minikube start --kubernetes-version=v1.20.2 && for addon in helm-tiller metallb metrics-server registry; do minikube addons enable $addon; done
+# Start minikube
 
+make start-minikube
+
+# Build and push images to minikube's registry
 eval $(minikube docker-env)
-# Build all the needed images and push to the minikube registry
 time make images
 
 # Use helm to install

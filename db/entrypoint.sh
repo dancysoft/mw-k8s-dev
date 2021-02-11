@@ -2,8 +2,22 @@
 
 set -eu -o pipefail
 
+function wait_for_db {
+    echo Waiting for mysql server to start
+    
+    while ! mysql </dev/null; do
+	sleep 1
+    done
+
+    echo mysql server running
+    
+}
+
 function setup_user {
     if [ "${DB_USER:-}" -a "${DB_PASSWORD:-}" ]; then
+
+	wait_for_db
+	
         echo Creating user $DB_USER
         mysql -e "create user '$DB_USER' identified by '$DB_PASSWORD';"
 
@@ -19,7 +33,6 @@ tail -f /var/log/mysql/error.log &
 mkdir -p /run/mysqld
 chown mysql: /run/mysqld
 
-# This runs after mysqld starts (hopefully)
-(sleep 2 ; setup_user ) &
+(setup_user) &
 
 exec tini mysqld

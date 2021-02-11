@@ -1,4 +1,4 @@
-IMAGE:=$(IMAGE_PREFIX)/mwdb:3
+IMAGE:=$(IMAGE_PREFIX)/mwdb:4
 
 image:
 	docker build -t $(IMAGE) .

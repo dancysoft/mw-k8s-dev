@@ -20,7 +20,7 @@ replicaCount: 1
 
 image:
   repository: localhost:5000/dancy/mw-k8s-dev/mwdb
-  tag: 3
+  tag: 4
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
