@@ -3,7 +3,7 @@ include Makefile.defs
 SUBDIRS=etcd db multiversion-image mw 
 
 images:
-	for dir in $(SUBDIRS); do $(MAKE) -C $$dir push; done
+	eval $$(minikube docker-env) && for dir in $(SUBDIRS); do $(MAKE) -C $$dir push; done
 
 run:
 	for dir in $(SUBDIRS); do $(MAKE) -C $$dir run; done

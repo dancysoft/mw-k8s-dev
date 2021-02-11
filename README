@@ -1,19 +1,16 @@
 # Install required packages
+sudo apt install make curl git jq
 
-apt install make curl git jq
-
-# Install minikube if needed. Requires sudo
+# If needed, install minikube. Requires sudo
 make install-minikube
 
-# Install kubectl if needed. Requires sudo
+# If neded, install kubectl. Requires sudo
 make install-kubectl
 
 # Start minikube
-
 make start-minikube
 
 # Build and push images to minikube's registry
-eval $(minikube docker-env)
 time make images
 
 # Use helm to install
