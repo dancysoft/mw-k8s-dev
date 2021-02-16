@@ -2,8 +2,6 @@
 
 set -eu -o pipefail
 
-# This operation takes about 5 minutes for 2 MW versions.
-
 WIKIVERSIONS=wikiversions-dev.json
 BUILD_DIR=/srv/mediawiki
 
@@ -14,19 +12,21 @@ for tool in jq git sort; do
     fi
 done
 
-function unique_wikiversions {
-    jq -r 'values[]' $WIKIVERSIONS | sort -u
+function configure_git {
+
+    git version
+
+    git config --global protocol.version 2
+
+    if [ "${GERRITMIRROR:-}" ]; then
+        echo Using gerrit mirror at $GERRITMIRROR
+        git config --global url.${GERRITMIRROR}.insteadOf https://gerrit.wikimedia.org/r
+    fi
+    
 }
 
-function choose_num_fetch_jobs {
-    local n=$(getconf _NPROCESSORS_ONLN)
-
-    if [ $n -gt 4 ]; then
-        # More is not necessarily better
-        n=4
-    fi
-
-    echo $n
+function unique_wikiversions {
+    jq -r 'values[]' $WIKIVERSIONS | sort -u
 }
 
 function prep_version {
@@ -35,12 +35,13 @@ function prep_version {
     local nophpvers=${vers:4}   # will be something like 1.36.0-wmf.27
     local branch=wmf/$nophpvers # branch will be something like wmf/1.36.0-wmf.27
 
-    local fetch_jobs=$(choose_num_fetch_jobs)
-
-    time git clone --depth 1 -b $branch https://gerrit.wikimedia.org/r/mediawiki/core $vers
-    echo Using $fetch_jobs jobs for submodule update
-    git -C $vers config submodule.fetchJobs $fetch_jobs
-    time git -C $vers submodule update --init --recursive
+    time git clone \
+         --depth 1 \
+         -j $(getconf _NPROCESSORS_ONLN) \
+         --recurse-submodules \
+         -b $branch \
+         https://gerrit.wikimedia.org/r/mediawiki/core \
+         $vers
 
     cat <<EOF > $vers/LocalSettings.php
 <?php
@@ -73,6 +74,8 @@ function compile_wikiversions {
 
 # Start fresh
 rm -fr $BUILD_DIR
+
+configure_git
 
 checkout_mediawiki_config
 

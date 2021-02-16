@@ -2,14 +2,11 @@ include Makefile.defs
 
 SUBDIRS=etcd db multiversion-image mw 
 
-images:
-	eval $$(minikube docker-env) && for dir in $(SUBDIRS); do $(MAKE) -C $$dir push; done
+images: check-minikube-running
+	bash -c 'set -e && eval $$(minikube docker-env) && echo DOCKER_HOST is $$DOCKER_HOST && for dir in $(SUBDIRS); do $(MAKE) -C $$dir push; done'
 
-run:
-	for dir in $(SUBDIRS); do $(MAKE) -C $$dir run; done
-
-stop:
-	for dir in $(SUBDIRS); do $(MAKE) -C $$dir stop; done
+check-minikube-running:
+	@if ! minikube status >/dev/null; then echo Please start minikube first; false; fi
 
 # Could include 'images' target but not doing that for now
 install: helm
@@ -34,7 +31,7 @@ install-minikube:
 	rm minikube_latest_amd64.deb
 
 start-minikube:
-	minikube start --kubernetes-version=v1.20.2 && for addon in helm-tiller metallb metrics-server registry; do minikube addons enable $$addon; done
+	minikube start --kubernetes-version=v1.20.2 --cpus $$(getconf _NPROCESSORS_ONLN) && for addon in helm-tiller metallb metrics-server registry; do minikube addons enable $$addon; done
 
 install-kubectl:
 	curl -LO "https://dl.k8s.io/release/$$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
