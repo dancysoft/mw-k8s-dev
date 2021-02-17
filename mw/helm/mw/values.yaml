@@ -21,7 +21,7 @@
   "replicaCount": 2,
   "image": {
     "repository": "localhost:5000/dancy/mw-k8s-dev/mw",
-    "tag": 44,
+    "tag": 45,
     "pullPolicy": "IfNotPresent"
   },
   "imagePullSecrets": [],

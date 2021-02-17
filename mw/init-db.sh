@@ -26,6 +26,8 @@ update-ca-certificates
 
 wait_for_db
 
+$(dirname $0)/init-l10n-locked.sh
+
 cd /srv/mediawiki
 
 for wiki in enwiki; do

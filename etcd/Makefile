@@ -24,6 +24,8 @@ push: image
 	docker push $(IMAGE)
 
 cert: ssl/server.crt
+	-kubectl delete secret etcd-tls || true
+	kubectl create secret tls etcd-tls --key=ssl/key.pem --cert=ssl/server.crt
 
 # make-cert requires access to a k8s cluster
 ssl/server.crt: make-cert

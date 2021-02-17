@@ -33,7 +33,6 @@ else
 fi
 
 sudo -u www-data \
-     env MW_NO_ETCD=1 \
      /usr/local/bin/mwscript rebuildLocalisationCache.php \
      --wiki=$wikidb \
      --store-class=LCStoreCDB \

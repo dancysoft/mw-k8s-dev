@@ -1,6 +1,6 @@
 include ../Makefile.defs
 
-IMAGE:=$(IMAGE_PREFIX)/mw:44
+IMAGE:=$(IMAGE_PREFIX)/mw:45
 
 image:
 	sed -e s\|MMW_IMAGE\|$(MMW_IMAGE)\| Dockerfile.template > Dockerfile.generated

@@ -12,6 +12,10 @@ spec:
         - name: ca
           configMap:
             name: kube-root-ca.crt
+        - name: l10n
+          hostPath:
+            path: {{ .Values.l10n.cache.nodePath }}
+            type: DirectoryOrCreate
         - name: private
           secret:
             secretName: {{ include "mw.fullname" . }}-private
@@ -30,10 +34,18 @@ spec:
             # FIXME: Should be in a Secret
             - name: DB_PASS
               value: {{ .Values.db.db.password | quote }}
+            - name: INIT_L10N_LANGS
+              value: {{ .Values.l10n.cache.langs | join "," | quote }}
+            - name: INIT_L10N_THREADS
+              value: {{ .Values.l10n.cache.rebuildThreads | quote }}
+            - name: INIT_L10N_CACHE_DIR
+              value: {{ .Values.l10n.cache.containerPath | quote }}
           volumeMounts:
             - name: ca
               mountPath: /usr/local/share/ca-certificates
               readOnly: true
+            - name: l10n
+              mountPath: {{ .Values.l10n.cache.containerPath }}
             - name: private
               mountPath: /srv/mediawiki/private
               readOnly: true

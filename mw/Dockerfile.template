@@ -42,11 +42,9 @@ COPY mediawiki.sh /etc/profile.d/
 COPY mwscript /usr/local/bin/
 COPY memcached.conf /etc/memcached.conf
 
-COPY subs.sh entrypoint.sh init-db.sh init-l10n.sh init-l10n-locked.sh merge-message-file-lists.sh rebuild-cdb.sh /
-
-RUN /merge-message-file-lists.sh && rm -fr /tmp/mw-cache-* /tmp/l10n-cache /tmp/wiki.log
+COPY subs.sh entrypoint.sh init-db.sh init-l10n.sh init-l10n-locked.sh rebuild-cdb.sh /
 
 EXPOSE 80
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-RUN curl -L -o /usr/local/sbin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 && chmod +x /usr/local/sbin/tini
+RUN curl -f -s -L -o /usr/local/sbin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 && chmod +x /usr/local/sbin/tini

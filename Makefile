@@ -17,6 +17,9 @@ install: helm
 uninstall: helm
 	$(MAKE) -C mw/helm/mw uninstall
 
+upgrade: helm
+	$(MAKE) -C mw/helm/mw upgrade
+
 # This is the version of the helm tiller that minikube installs.
 helm-version=v2.16.12
 helm:

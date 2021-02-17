@@ -37,6 +37,7 @@ spec:
 
       initContainers:
         # Ensure that l10n.cache.containerPath is writable by www-data
+        # FIXME: Try using fsgroup in the securityContext of the main container instead.
         - name: {{ .Chart.Name }}-init-l10n-dir
           securityContext:
             runAsUser: 0
@@ -46,34 +47,6 @@ spec:
           volumeMounts:
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
-
-        - name: {{ .Chart.Name }}-init-l10n
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ /init-l10n-locked.sh ]
-          env:
-            - name: INIT_L10N_LANGS
-              value: {{ .Values.l10n.cache.langs | join "," | quote }}
-            - name: INIT_L10N_THREADS
-              value: {{ .Values.l10n.cache.rebuildThreads | quote }}
-          volumeMounts:
-            - name: ca
-              mountPath: /usr/local/share/ca-certificates
-              readOnly: true
-            - name: l10n
-              mountPath: {{ .Values.l10n.cache.containerPath }}
-            - name: private
-              mountPath: /srv/mediawiki/private
-              readOnly: true
-          resources:
-            requests:
-              cpu: 1
-              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
-            limits:
-              cpu: {{ .Values.l10n.cache.rebuildThreads }}
-              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
 
       containers:
         - name: {{ .Chart.Name }}
@@ -87,7 +60,8 @@ spec:
               readOnly: true
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
-              readOnly: true
+              # Needs to be writable for the time being.  Not a good design. :-(
+              readOnly: false
             - name: private
               mountPath: /srv/mediawiki/private
               readOnly: true
@@ -95,6 +69,13 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          env:
+            - name: INIT_L10N_LANGS
+              value: {{ .Values.l10n.cache.langs | join "," | quote }}
+            - name: INIT_L10N_THREADS
+              value: {{ .Values.l10n.cache.rebuildThreads | quote }}
+            - name: INIT_L10N_CACHE_DIR
+              value: {{ .Values.l10n.cache.containerPath | quote }}
           livenessProbe:
             httpGet:
               path: /
@@ -107,7 +88,13 @@ spec:
                 - name: Host
                   value: en.wikipedia.org
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            # FIXME: These requests/limits are based on the costs of a full l10n bulid.
+            requests:
+              cpu: 1
+              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
+            limits:
+              cpu: {{ .Values.l10n.cache.rebuildThreads }}
+              memory: {{ .Values.l10n.cache.rebuildThreads | mul 150 }}Mi
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
