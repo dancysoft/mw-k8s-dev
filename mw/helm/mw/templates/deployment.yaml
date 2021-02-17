@@ -36,8 +36,9 @@ spec:
             secretName: {{ include "mw.fullname" . }}-private
 
       initContainers:
-        # Ensure that l10n.cache.containerPath is writable by www-data
-        # FIXME: Try using fsgroup in the securityContext of the main container instead.
+        # Ensure that l10n.cache.containerPath is writable by www-data.
+        # Note, this means this pod must be able to run processes as root.  If there
+        # is a pod security policy which prevents that, this won't work.
         - name: {{ .Chart.Name }}-init-l10n-dir
           securityContext:
             runAsUser: 0
@@ -60,7 +61,6 @@ spec:
               readOnly: true
             - name: l10n
               mountPath: {{ .Values.l10n.cache.containerPath }}
-              # Needs to be writable for the time being.  Not a good design. :-(
               readOnly: false
             - name: private
               mountPath: /srv/mediawiki/private
