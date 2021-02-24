@@ -1,15 +1,13 @@
-FROM debian:9
+FROM docker-registry.wikimedia.org/wikimedia-buster:latest
 
 COPY --from=MMW_IMAGE /srv/mediawiki /srv/mediawiki
 
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y dirmngr curl sudo
-RUN curl -s -f 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8a2df05748f9d524a3a2ade9d392d3ffadf18fb' | apt-key add -
-RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia main' >> /etc/apt/sources.list
-RUN echo 'deb [trusted=yes] http://apt.wikimedia.org/wikimedia stretch-wikimedia component/php72' >> /etc/apt/sources.list
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y dirmngr curl sudo ca-certificates
+RUN echo 'deb http://apt.wikimedia.org/wikimedia buster-wikimedia component/php72' >> /etc/apt/sources.list
 RUN apt-get update
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm=7.2.31-1+0~20200514.41+debian9~1.gbpe2a56b+wmf1 php-apcu php-curl php7.2-dba php-intl php-memcached=3.0.1+2.2.0-1~wmf3 php-msgpack=2.0.2+0.5.7-1~wmf3+php72 php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached rsync firejail mysql-client
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php7.2 php7.2-fpm php-apcu php-curl php7.2-dba php-intl php-memcached php-msgpack php-mbstring php-mysql php-redis php-xml apache2 jq libapache2-mod-security2 memcached rsync default-mysql-client
 
 # Debug stuff
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y strace lsof net-tools tcpdump emacs-nox
