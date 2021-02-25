@@ -1,5 +1,5 @@
 # Install required packages
-sudo apt install make curl git jq
+sudo apt install make curl git jq time
 
 # If needed, install minikube. Requires sudo
 make install-minikube
